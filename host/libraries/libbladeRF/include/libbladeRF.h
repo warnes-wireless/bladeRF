@@ -22,6 +22,7 @@
 #ifndef LIBBLADERF_H_
 #define LIBBLADERF_H_
 
+
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -104,7 +105,13 @@ extern "C" {
  */
 
 /** This structure is an opaque device handle */
+#ifdef MATLAB_LINUX_THUNK_BUILD_
+struct bladerf {
+    uint32_t _;
+};
+#else
 struct bladerf;
+#endif
 
 /**
  * Backend by which the host communicates with the device
@@ -145,9 +152,20 @@ struct bladerf_devinfo {
  */
 struct bladerf_backendinfo {
     int handle_count;                   /**< Backend handle count */
+
+    #ifdef MATLAB_LINUX_THUNK_BUILD_
+    int64_t handle;                       /**< Backend handle for device */
+    #else
     void *handle;                       /**< Backend handle for device */
+    #endif
+
     int lock_count;                     /**< Backend lock count */
+
+    #ifdef MATLAB_LINUX_THUNK_BUILD_
+    int64_t lock;                       /**< Backend handle for device */
+    #else
     void *lock;                         /**< Backend lock for device */
+    #endif
 };
 
 /**
@@ -1832,8 +1850,12 @@ typedef uint64_t bladerf_timestamp;
  *
  * This structure should be filled in via bladerf_get_quick_tune().
  */
+#ifdef MATLAB_LINUX_THUNK_BUILD_
+union bladerf_quick_tune {
+#else
 struct bladerf_quick_tune {
     union {
+#endif
         /* bladeRF1 quick tune parameters */
         struct {
             uint8_t freqsel; /**< Choice of VCO and VCO division factor */
@@ -1850,7 +1872,9 @@ struct bladerf_quick_tune {
             uint8_t port;          /**< RFFE port settings */
             uint8_t spdt;          /**< External SPDT settings */
         };
+#ifndef MATLAB_LINUX_THUNK_BUILD_
     };
+#endif
 };
 
 /**
@@ -1886,7 +1910,12 @@ int CALL_CONV bladerf_schedule_retune(struct bladerf *dev,
                                       bladerf_channel ch,
                                       bladerf_timestamp timestamp,
                                       bladerf_frequency frequency,
-                                      struct bladerf_quick_tune *quick_tune);
+#ifdef MATLAB_LINUX_THUNK_BUILD_                                      
+                                      union bladerf_quick_tune *quick_tune
+#else
+                                      struct bladerf_quick_tune *quick_tune
+#endif                                      
+                                     );
 
 /**
  * Cancel all pending scheduled retune operations for the specified channel.
@@ -1927,7 +1956,12 @@ int CALL_CONV bladerf_cancel_scheduled_retunes(struct bladerf *dev,
 API_EXPORT
 int CALL_CONV bladerf_get_quick_tune(struct bladerf *dev,
                                      bladerf_channel ch,
-                                     struct bladerf_quick_tune *quick_tune);
+#ifdef MATLAB_LINUX_THUNK_BUILD_
+                                     union bladerf_quick_tune *quick_tune
+#else
+                                     struct bladerf_quick_tune *quick_tune
+#endif
+                                    );
 
 /** @} (End of FN_SCHEDULED_TUNING) */
 
@@ -2742,7 +2776,13 @@ int CALL_CONV bladerf_sync_rx(struct bladerf *dev,
 #define BLADERF_STREAM_NO_DATA ((void *)(-1))
 
 /** This opaque structure is used to keep track of stream information */
+#ifdef MATLAB_LINUX_THUNK_BUILD_
+struct bladerf_stream {
+    uint32_t _;
+};
+#else
 struct bladerf_stream;
+#endif
 
 /**
  * This typedef represents a callback function that is executed in response to
@@ -3249,7 +3289,11 @@ struct bladerf_image {
     uint32_t length;
 
     /** Image data */
+    #ifdef MATLAB_LINUX_THUNK_BUILD_
+    int64_t data;
+    #else
     uint8_t *data;
+    #endif
 };
 
 /**

@@ -54,3 +54,12 @@ host/misc/windows/scripts/work
 **/modelsim/*.wlf
 **/modelsim/work/
 **/modelsim/nuand/
+
+build*/
+
+.DS_Store
+.vscode/*.log
+.eggs
+
+# Matlab autosave file
+*.asv
